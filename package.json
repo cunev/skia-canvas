@@ -25,7 +25,7 @@
     "path": "path-browserify"
   },
   "scripts": {
-    "build": "cargo-cp-artifact -nc lib/v8/index.node -- cargo build --message-format=json-render-diagnostics",
+    "build": "cargo-cp-artifact -nc lib/v8/index.node -- cargo build --message-format=json-render-diagnostics --features window,vulkan",
     "install": "node-pre-gyp install || npm run build -- --release",
     "package": "node-pre-gyp package",
     "upload": "gh release upload v$npm_package_version build/stage/v$npm_package_version/*",
