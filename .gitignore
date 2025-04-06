@@ -3,7 +3,6 @@
 .env
 _arc
 build
-lib/v*/*.node
 node_modules
 native/artifacts.json
 native/target
