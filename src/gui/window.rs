@@ -22,6 +22,7 @@ pub struct WindowSpec {
     pub visible: bool,
     pub resizable: bool,
     pub fullscreen: bool,
+    pub exclusive_fullscreen: bool,
     pub background: String,
     pub page: u32,
     pub width: f32,
@@ -104,12 +105,18 @@ impl Window {
             }
         };
 
-        let window_attributes = WinitWindow::default_attributes()
-            .with_fullscreen(if spec.fullscreen {
-                Some(Fullscreen::Borderless(None))
+        let fullscreen_mode = if spec.fullscreen {
+            if spec.exclusive_fullscreen {
+                Some(Fullscreen::Exclusive(event_loop.primary_monitor().unwrap().video_modes().next().unwrap()))
             } else {
-                None
-            })
+                Some(Fullscreen::Borderless(None))
+            }
+        } else {
+            None
+        };
+
+        let window_attributes = WinitWindow::default_attributes()
+            .with_fullscreen(fullscreen_mode)
             .with_inner_size(size)
             .with_transparent(background.a() < 255)
             .with_title(spec.title.clone())
@@ -279,11 +286,24 @@ impl Window {
     }
 
     pub fn set_fullscreen(&mut self, to_fullscreen: bool) {
-        match to_fullscreen {
-            true => self
-                .handle
-                .set_fullscreen(Some(Fullscreen::Borderless(None))),
-            false => self.handle.set_fullscreen(None),
+        if to_fullscreen {
+            let fullscreen_mode = if self.spec.exclusive_fullscreen {
+                // Use the first available video mode from the monitor for exclusive fullscreen
+                if let Some(monitor) = self.handle.current_monitor() {
+                    if let Some(mode) = monitor.video_modes().next() {
+                        Some(Fullscreen::Exclusive(mode))
+                    } else {
+                        Some(Fullscreen::Borderless(None))
+                    }
+                } else {
+                    Some(Fullscreen::Borderless(None))
+                }
+            } else {
+                Some(Fullscreen::Borderless(None))
+            };
+            self.handle.set_fullscreen(fullscreen_mode);
+        } else {
+            self.handle.set_fullscreen(None);
         }
     }
 

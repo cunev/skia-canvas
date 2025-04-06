@@ -76,7 +76,8 @@ impl WindowManager {
                 win.set_visible(spec.visible);
             }
 
-            if spec.fullscreen != win.spec.fullscreen {
+            if spec.fullscreen != win.spec.fullscreen || 
+               spec.exclusive_fullscreen != win.spec.exclusive_fullscreen {
                 win.set_fullscreen(spec.fullscreen);
                 win.sieve.go_fullscreen(spec.fullscreen);
             }
